@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <title>掲示板</title>
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <style>
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .post-item {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <v-app>
+      <v-container class="container">
+        <!-- 投稿フォーム -->
+        <v-form>
+          <v-textarea
+            v-model="newPost.content"
+            label="内容"
+            rows="5"
+            required
+          ></v-textarea>
+          <v-btn @click="addPost" color="primary">投稿</v-btn>
+        </v-form>
+
+        <!-- 投稿リスト -->
+        <v-divider></v-divider>
+        <v-list>
+          <v-list-item-group v-if="posts.length">
+            <v-list-item v-for="(post, index) in posts" :key="index">
+              <v-list-item-content>
+                <v-list-item-subtitle>{{ post.content }}</v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list-item-group>
+          <v-list-item v-else>
+            <v-list-item-content>
+              <v-list-item-title>投稿はまだありません</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </v-container>
+    </v-app>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+
+  <script>
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+      data() {
+        return {
+          newPost: {
+            content: ''
+          },
+          posts: []
+        };
+      },
+      methods: {
+        addPost() {
+          if (this.newPost.content) {
+            this.posts.push({
+              content: this.newPost.content
+            });
+            // フォームをクリアする
+            this.newPost.content = '';
+          } else {
+            alert('内容を入力してください');
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
