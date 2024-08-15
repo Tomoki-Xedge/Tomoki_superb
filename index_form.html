@@ -1,3 +1,5 @@
+0815 更新版 index_form
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -23,41 +25,16 @@
   <div id="app">
     <v-app>
       <v-container class="container">
-        <!-- ログインフォーム -->
-        <v-card v-if="!isLoggedIn">
-          <v-card-title>ログイン</v-card-title>
-          <v-form>
-            <v-text-field
-              v-model="login.id"
-              label="ID"
-              required
-            ></v-text-field>
-            <v-text-field
-              v-model="login.password"
-              label="Password"
-              type="password"
-              required
-            ></v-text-field>
-            <v-btn @click="loginUser" color="primary">ログイン</v-btn>
-            <v-alert v-if="loginError" type="error">{{ loginError }}</v-alert>
-          </v-form>
-        </v-card>
-
         <!-- 投稿フォーム -->
-        <v-card v-if="isLoggedIn">
-          <v-card-title>新規投稿</v-card-title>
-          <v-form>
-            <v-textarea
-              v-model="newPost.content"
-              label="内容"
-              rows="5"
-              required
-            ></v-textarea>
-            <v-btn @click="addPost" color="primary">投稿</v-btn>
-            <v-alert v-if="postError" type="error">{{ postError }}</v-alert>
-          </v-form>
-          <v-card-subtitle>ログイン中: {{ userNickname }}</v-card-subtitle>
-        </v-card>
+        <v-form>
+          <v-textarea
+            v-model="newPost.content"
+            label="内容"
+            rows="5"
+            required
+          ></v-textarea>
+          <v-btn @click="addPost" color="primary">投稿</v-btn>
+        </v-form>
 
         <!-- 投稿リスト -->
         <v-divider></v-divider>
@@ -66,7 +43,6 @@
             <v-list-item v-for="(post, index) in posts" :key="index">
               <v-list-item-content>
                 <v-list-item-subtitle>{{ post.content }}</v-list-item-subtitle>
-                <v-list-item-subtitle class="grey--text">{{ post.timestamp }}</v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
           </v-list-item-group>
@@ -82,100 +58,29 @@
 
   <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
-  
+
   <script>
     new Vue({
       el: '#app',
       vuetify: new Vuetify(),
       data() {
         return {
-          login: {
-            id: '',
-            password: ''
-          },
           newPost: {
             content: ''
           },
-          posts: [],
-          isLoggedIn: false,
-          userID: '',
-          userNickname: '',
-          loginError: '',
-          postError: ''
+          posts: []
         };
       },
       methods: {
-        async loginUser() {
-          try {
-            const response = await fetch('/api/login', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                ID: this.login.id,
-                Password: this.login.password
-              })
-            });
-            const result = await response.json();
-
-            if (response.ok) {
-              this.userID = this.login.id;
-              this.userNickname = result.Nickname;
-              this.isLoggedIn = true;
-              this.loginError = '';
-              this.fetchPosts(); // ログイン後に投稿を取得
-            } else {
-              this.loginError = result.Message || 'ログイン失敗';
-            }
-          } catch (error) {
-            this.loginError = 'エラーが発生しました';
-            console.error(error);
-          }
-        },
-        async addPost() {
+        addPost() {
           if (this.newPost.content) {
-            try {
-              const response = await fetch('/api/posts', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                  ID: this.userID,
-                  Content: this.newPost.content
-                })
-              });
-              const result = await response.json();
-
-              if (response.ok) {
-                this.newPost.content = '';
-                this.fetchPosts(); // 投稿後にリストを更新
-                this.postError = '';
-              } else {
-                this.postError = result.Message || '投稿失敗';
-              }
-            } catch (error) {
-              this.postError = 'エラーが発生しました';
-              console.error(error);
-            }
+            this.posts.push({
+              content: this.newPost.content
+            });
+            // フォームをクリアする
+            this.newPost.content = '';
           } else {
-            this.postError = '内容を入力してください';
-          }
-        },
-        async fetchPosts() {
-          try {
-            const response = await fetch(`/api/posts/${this.userID}`);
-            const result = await response.json();
-
-            if (response.ok) {
-              this.posts = result;
-            } else {
-              this.postError = '投稿の取得に失敗しました';
-            }
-          } catch (error) {
-            this.postError = 'エラーが発生しました';
-            console.error(error);
+            alert('内容を入力してください');
           }
         }
       }

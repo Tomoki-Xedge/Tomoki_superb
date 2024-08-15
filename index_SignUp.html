@@ -1,3 +1,4 @@
+0815 更新版 index_SignUp
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -168,7 +169,7 @@
           };
 
           // サーバーにデータを送信
-          const response = await axios.post('https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/RegisterUser', formData);
+          const response = await axios.post('https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/INSERT', formData);
 
           // レスポンスの処理
           formMessage.textContent = response.data.Message;
@@ -190,3 +191,4 @@
   </script>
 </body>
 </html>
+
