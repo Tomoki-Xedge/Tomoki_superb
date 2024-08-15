@@ -10,7 +10,7 @@
     [v-cloak] {
       display: none;
     }
-    
+
     /* 全体のスタイル設定 */
     body, html {
       margin: 0;
@@ -110,6 +110,10 @@
 
             if (response.status === 200) {
               // ログイン成功後の処理
+              const result = response.data;
+              // 成功時に Nickname をセッションストレージに保存
+              sessionStorage.setItem('userID', this.id);
+              sessionStorage.setItem('userNickname', result.Nickname);
               window.location.href = 'index_form.html'; 
             }
           } catch (error) {
