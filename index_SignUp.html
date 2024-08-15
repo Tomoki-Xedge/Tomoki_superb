@@ -70,6 +70,8 @@
       text-decoration: underline;
     }
   </style>
+  <!-- Axios CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -77,20 +79,21 @@
     <form id="userForm">
       <div class="form-group">
         <label for="nickname">ニックネーム:</label>
-        <input type="text" id="nickname" name="nickname" maxlength="10" required>
+        <input type="text" id="nickname" name="nickname" maxlength="20" required>
         <div id="nicknameError" class="error"></div>
       </div>
       <div class="form-group">
         <label for="id">ID:</label>
-        <input type="text" id="id" name="id" maxlength="10" required pattern="[a-zA-Z0-9]*">
+        <input type="text" id="id" name="id" maxlength="12" required pattern="[a-zA-Z0-9]*">
         <div id="idError" class="error"></div>
       </div>
       <div class="form-group">
         <label for="password">パスワード:</label>
-        <input type="password" id="password" name="password" maxlength="10" required pattern="[a-zA-Z0-9]*">
+        <input type="password" id="password" name="password" maxlength="12" required pattern="[a-zA-Z0-9]*">
         <div id="passwordError" class="error"></div>
       </div>
       <button type="submit" class="btn">登録</button>
+      <div id="formMessage" class="error"></div>
     </form>
 
     <!-- 戻るリンク -->
@@ -98,7 +101,7 @@
   </div>
 
   <script>
-    document.getElementById('userForm').addEventListener('submit', function(event) {
+    document.getElementById('userForm').addEventListener('submit', async function(event) {
       event.preventDefault(); // フォームのデフォルトの送信を防ぐ
 
       // 入力フィールドの取得
@@ -110,11 +113,13 @@
       const nicknameError = document.getElementById('nicknameError');
       const idError = document.getElementById('idError');
       const passwordError = document.getElementById('passwordError');
+      const formMessage = document.getElementById('formMessage');
 
       // エラーメッセージの初期化
       nicknameError.textContent = '';
       idError.textContent = '';
       passwordError.textContent = '';
+      formMessage.textContent = '';
 
       // バリデーションフラグ
       let isValid = true;
@@ -122,6 +127,9 @@
       // ニックネームのバリデーション
       if (nickname.value.length === 0) {
         nicknameError.textContent = 'ニックネームは必須です';
+        isValid = false;
+      } else if (nickname.value.length > 20) {
+        nicknameError.textContent = 'ニックネームは20文字以内で入力してください';
         isValid = false;
       }
 
@@ -132,6 +140,9 @@
       } else if (id.value.length === 0) {
         idError.textContent = 'IDは必須です';
         isValid = false;
+      } else if (id.value.length > 12) {
+        idError.textContent = 'IDは12文字以内で入力してください';
+        isValid = false;
       }
 
       // パスワードのバリデーション
@@ -141,12 +152,39 @@
       } else if (password.value.length === 0) {
         passwordError.textContent = 'パスワードは必須です';
         isValid = false;
+      } else if (password.value.length > 12) {
+        passwordError.textContent = 'パスワードは12文字以内で入力してください';
+        isValid = false;
       }
 
       // バリデーション成功時の処理
       if (isValid) {
-        alert('フォームが正常に送信されました!');
-        // フォームデータを処理するコードをここに追加
+        try {
+          // フォームデータの収集
+          const formData = {
+            Nickname: nickname.value,
+            ID: id.value,
+            Password: password.value
+          };
+
+          // サーバーにデータを送信
+          const response = await axios.post('https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/INSERT', formData);
+
+          // レスポンスの処理
+          formMessage.textContent = response.data.Message;
+          formMessage.style.color = response.status === 200 ? 'green' : 'red';
+
+          // 成功時の処理
+          if (response.status === 200) {
+            // 2秒後にリダイレクトする
+            setTimeout(() => {
+              window.location.href = 'index_SignUpResult.html';
+            }, 2000);
+          }
+        } catch (error) {
+          formMessage.textContent = '送信中にエラーが発生しました: ' + error.message;
+          formMessage.style.color = 'red';
+        }
       }
     });
   </script>

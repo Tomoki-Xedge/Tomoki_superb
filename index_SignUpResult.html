@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <title>会員登録完了</title>
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <style>
+    [v-cloak] {
+      display: none;
+    }
+    
+    /* 全体のスタイル設定 */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+    
+    /* メッセージコンテナのスタイル設定 */
+    .completion-message {
+      width: 100%;
+      max-width: 500px;
+      margin: 50px auto; /* 上下に50pxのマージン、中央揃え */
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .completion-title {
+      margin-bottom: 20px;
+      font-size: 1.5em;
+      font-weight: bold;
+      text-align: center; /* テキストを中央揃え */
+    }
+
+    .completion-subtitle {
+      margin-bottom: 20px;
+      font-size: 1.2em;
+      text-align: center; /* テキストを中央揃え */
+    }
+
+    .back-link {
+      display: block;
+      margin-top: 15px;
+      color: #007bff;
+      text-decoration: none;
+      text-align: center; /* リンクを中央揃え */
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" v-cloak>
+    <v-app>
+      <v-container fluid>
+        <v-row>
+          <v-col cols="12">
+            <v-card class="completion-message" flat>
+              <v-card-title class="completion-title">
+                会員登録が完了しました
+              </v-card-title>
+              <v-card-subtitle class="completion-subtitle">
+                ご登録ありがとうございます！<br>
+                登録が正常に完了しました。<br>
+                これからログインしてご利用ください。
+              </v-card-subtitle>
+              <a href="index_SignUp.html" class="back-link">ログインページに戻る</a>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-app>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify()
+    });
+  </script>
+</body>
+</html>
