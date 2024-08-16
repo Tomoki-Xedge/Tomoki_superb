@@ -31,11 +31,6 @@
             rows="5"
             required
           ></v-textarea>
-          <v-text-field
-            v-model="newPost.username"
-            label="ニックネーム"
-            required
-          ></v-text-field>
           <v-btn @click="addPost" color="primary">投稿</v-btn>
         </v-form>
 
@@ -43,11 +38,9 @@
         <v-divider></v-divider>
         <v-list>
           <v-list-item-group v-if="posts.length">
-            <v-list-item v-for="(post, index) in posts" :key="post.ID">
+            <v-list-item v-for="(post, index) in posts" :key="index">
               <v-list-item-content>
-                <v-list-item-subtitle>{{ post.Content }}</v-list-item-subtitle>
-                <v-list-item-subtitle>投稿者: {{ post.Username }}</v-list-item-subtitle>
-                <v-list-item-subtitle>投稿日: {{ new Date(post.CreatedAt).toLocaleString() }}</v-list-item-subtitle>
+                <v-list-item-subtitle>{{ post.content }}</v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
           </v-list-item-group>
@@ -71,57 +64,21 @@
       data() {
         return {
           newPost: {
-            content: '',
-            username: ''
+            content: ''
           },
           posts: []
         };
       },
-      created() {
-        this.fetchPosts();
-      },
       methods: {
-        async addPost() {
-          if (this.newPost.content && this.newPost.username) {
-            try {
-              const response = await fetch('https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/ADD_POST', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                  Content: this.newPost.content,
-                  Username: this.newPost.username
-                })
-              });
-              const result = await response.json();
-              if (response.ok) {
-                this.newPost.content = ''; // フォームをクリア
-                this.newPost.username = ''; // フォームをクリア
-                this.fetchPosts(); // 投稿リストを再取得
-              } else {
-                alert(result.Message || '投稿に失敗しました');
-              }
-            } catch (error) {
-              console.error('Error adding post:', error);
-              alert('投稿に失敗しました');
-            }
+        addPost() {
+          if (this.newPost.content) {
+            this.posts.push({
+              content: this.newPost.content
+            });
+            // フォームをクリアする
+            this.newPost.content = '';
           } else {
-            alert('内容とニックネームを入力してください');
-          }
-        },
-        async fetchPosts() {
-          try {
-            const response = await fetch('https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/GET_POSTS');
-            const result = await response.json();
-            if (response.ok) {
-              this.posts = result.Posts;
-            } else {
-              alert('投稿の取得に失敗しました');
-            }
-          } catch (error) {
-            console.error('Error fetching posts:', error);
-            alert('投稿の取得に失敗しました');
+            alert('内容を入力してください');
           }
         }
       }
