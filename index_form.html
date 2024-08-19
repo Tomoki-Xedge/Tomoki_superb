@@ -33,18 +33,18 @@
       transform: translate(-50%, -50%);
     }
 
-    .showReseult_text {
+    .showResult_text {
       margin-top: 10px;
       font-family: "MS Mincho", serif;
       font-weight: 1000;
       font-size: 150px;
-      white-space: nowrap; 
+      white-space: nowrap;
       background-color: antiquewhite;
       animation: zoomIn 0.5s forwards ease-in-out;
       opacity: 0;
     }
 
-    .shareBotton_X {
+    .shareButton_X {
       background-color: black !important;
       color: white !important;
     }
@@ -70,9 +70,9 @@
     <div class="fortuneArea">
       <v-app>
         <div class="textArea">
-          <v-btn large color="green" @click="drawFortune" class="fortuneBotton"><span>早速占う</span></v-btn>
-          <p v-if="showResult" :key="resultKey" class="showReseult_text">{{ fortuneResult }}</p>
-          <v-btn v-if="showResult" large @click="shareResult" class="shareBotton_X">
+          <v-btn large color="green" @click="drawFortune" class="fortuneButton"><span>早速占う</span></v-btn>
+          <p v-if="showResult" :key="resultKey" class="showResult_text">{{ fortuneResult }}</p>
+          <v-btn v-if="showResult" large @click="shareResult" class="shareButton_X">
             <v-icon left>mdi-twitter</v-icon>
             結果をXでシェアする
           </v-btn>
