@@ -54,23 +54,19 @@
       },
       methods: {
         async getFortune() {
-          console.log('おみくじを引くボタンが押されました'); // デバッグ用ログ
-
           try {
+            // APIのURL
             const apiUrl = 'https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/GET_FORTUNE_RESULT';
-            console.log('APIリクエストを送信:', apiUrl); // デバッグ用ログ
 
-            // APIリクエストを送信
+            // APIからデータを取得
             const response = await fetch(apiUrl);
-
-            // レスポンスの確認
+            
             if (!response.ok) {
               throw new Error(`HTTPエラー！ ステータスコード: ${response.status}`);
             }
 
             // JSON形式でレスポンスを解析
             const data = await response.json();
-            console.log('APIレスポンスデータ:', data); // デバッグ用ログ
 
             // 結果を表示
             this.fortuneResult = data.FortuneResult;
