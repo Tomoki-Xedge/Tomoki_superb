@@ -67,6 +67,7 @@
 
             // JSON形式でレスポンスを解析
             const data = await response.json();
+            console.log(data);  
 
             // 結果を表示
             this.fortuneResult = data.FortuneResult;
