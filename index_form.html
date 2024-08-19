@@ -20,11 +20,9 @@
               </v-card-actions>
               <v-card-text>
                 <v-list>
-                  <v-list-item-group v-if="results.length > 0">
-                    <v-list-item v-for="(result, index) in results" :key="index">
-                      {{ result }}
-                    </v-list-item>
-                  </v-list-item-group>
+                  <v-list-item v-if="result">
+                    {{ result }}
+                  </v-list-item>
                   <v-list-item v-else>
                     <v-list-item-content>結果がありません</v-list-item-content>
                   </v-list-item>
@@ -46,7 +44,7 @@
       vuetify: new Vuetify(),
       data() {
         return {
-          results: []
+          result: null
         };
       },
       methods: {
@@ -57,7 +55,7 @@
               throw new Error('ネットワークエラー');
             }
             const data = await response.json();
-            this.results = data;
+            this.result = data;
           } catch (error) {
             console.error('エラー:', error);
             alert('おみくじの結果を取得できませんでした。');
