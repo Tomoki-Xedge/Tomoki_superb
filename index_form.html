@@ -52,7 +52,7 @@
       methods: {
         async fetchFortuneResults() {
           try {
-            const response = await fetch('https://<your-function-url>/api/GET_FORTUNE_RESULTS');
+            const response = await fetch('https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/GET_FORTUNE_RESULTS');
             if (!response.ok) {
               throw new Error('ネットワークエラー');
             }
