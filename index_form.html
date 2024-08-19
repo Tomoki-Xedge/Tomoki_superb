@@ -1,298 +1,138 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Microsoft.Data.SqlClient; // DB接続用ライブラリ
-using Newtonsoft.Json;
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="おみくじアプリケーション">
+  <title>おみくじアプリケーション</title>
 
-namespace FunctionAPIApp
-{
-    public static class Function1
-    {
-        [FunctionName("SELECT")]
-        public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
-            ILogger log)
-        {
-            // インサート用のパラメーター取得（GETメソッド用）
-            string id = req.Query["ID"];
-            string password = req.Query["Password"];
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  
+  <!-- Material Design Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font/css/materialdesignicons.min.css" rel="stylesheet">
+  
+  <!-- Vuetify CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
 
-            // インサート用のパラメーター取得（POSTメソッド用）
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            id = id ?? data?.ID;
-            password = password ?? data?.Password;
-
-            // パラメーターが設定されていない場合はエラーメッセージを返す
-            if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(password))
-            {
-                return new BadRequestObjectResult(new
-                {
-                    Message = "ID または Password が指定されていません。",
-                    StatusCode = StatusCodes.Status400BadRequest
-                });
-            }
-
-            try
-            {
-                // DB接続設定（接続文字列の構築）
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder
-                {
-                    DataSource = "m3h-tomokimure-server.database.windows.net",
-                    UserID = "torutoru2004",
-                    Password = "Tomoki0526",
-                    InitialCatalog = "m3h-Tomoki-ultimateDB"
-                };
-
-                // 接続用オブジェクトの初期化
-                using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
-                {
-                    // 実行するクエリ（パラメーター化）
-                    string sql = "SELECT COUNT(1) FROM MemberTable WHERE ID = @ID AND Password = @Password";
-
-                    // SQL実行オブジェクトの初期化
-                    using (SqlCommand command = new SqlCommand(sql, connection))
-                    {
-                        // パラメーターの追加
-                        command.Parameters.AddWithValue("@ID", id);
-                        command.Parameters.AddWithValue("@Password", password);
-
-                        // DBと接続
-                        await connection.OpenAsync();
-
-                        // SQLを実行し、結果を確認
-                        int count = (int)await command.ExecuteScalarAsync();
-
-                        if (count > 0)
-                        {
-                            // IDとPasswordが一致する場合
-                            return new OkObjectResult(new
-                            {
-                                Message = "OK",
-                                StatusCode = StatusCodes.Status200OK
-                            });
-                        }
-                        else
-                        {
-                            // IDまたはPasswordが一致しない場合
-                            return new UnauthorizedObjectResult(new
-                            {
-                                Message = "ID または Password が一致しません。",
-                                StatusCode = StatusCodes.Status401Unauthorized
-                            });
-                        }
-                    }
-                }
-            }
-            catch (SqlException e)
-            {
-                // エラーをログに出力
-                log.LogError(e.ToString());
-
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
-            }
-        }
-
-        [FunctionName("INSERT")]
-        public static async Task<IActionResult> RunInsert(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
-            ILogger log)
-        {
-            log.LogInformation("C# HTTP trigger function processed a request.");
-
-            // HTTPレスポンスで返す文字列を定義
-            string responseMessage = "INSERT RESULT:";
-
-            // POSTメソッド用のインサート用のパラメーター取得
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            string nickname = data?.Nickname;
-            string id = data?.ID;
-            string password = data?.Password;
-
-            // パラメーターが全て取得できた場合のみ処理
-            if (!string.IsNullOrWhiteSpace(nickname) && !string.IsNullOrWhiteSpace(id) && !string.IsNullOrWhiteSpace(password))
-            {
-                try
-                {
-                    // DB接続設定（接続文字列の構築）
-                    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder
-                    {
-                        DataSource = "m3h-tomokimure-server.database.windows.net",
-                        UserID = "torutoru2004",
-                        Password = "Tomoki0526",
-                        InitialCatalog = "m3h-Tomoki-ultimateDB"
-                    };
-
-                    // SQLコネクションを初期化
-                    using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
-                    {
-                        // 実行するSQL（パラメーター付き）
-                        string sql = "INSERT INTO MemberTable (Nickname, ID, Password) VALUES (@Nickname, @ID, @Password)";
-
-                        // SQLコマンドを初期化
-                        using (SqlCommand command = new SqlCommand(sql, connection))
-                        {
-                            // パラメーターを設定
-                            command.Parameters.AddWithValue("@Nickname", nickname);
-                            command.Parameters.AddWithValue("@ID", id);
-                            command.Parameters.AddWithValue("@Password", password);
-
-                            // コネクションオープン（＝ SQL Database に接続）
-                            await connection.OpenAsync();
-
-                            // SQLコマンドを実行し結果行数を取得
-                            int result = await command.ExecuteNonQueryAsync();
-
-                            // 結果をレスポンスに格納
-                            responseMessage = responseMessage + $"{result} 行挿入されました";
-                        }
-                    }
-                }
-                // DB処理でエラーが発生した場合
-                catch (SqlException e)
-                {
-                    // エラーをレスポンスに格納
-                    responseMessage = "データベースエラーが発生しました: " + e.Message;
-                    log.LogError(e.ToString());
-                }
-            }
-            else
-            {
-                responseMessage = "必要なパラメーターが設定されていません";
-            }
-
-            // HTTPレスポンスを返却
-            return new OkObjectResult(responseMessage);
-        }
-
-        [FunctionName("INSERT_FORTUNE")]
-        public static async Task<IActionResult> InsertFortune(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
-            ILogger log)
-        {
-            log.LogInformation("C# HTTP trigger function processed a request.");
-
-            // HTTPレスポンスで返す文字列を定義
-            string responseMessage = "INSERT RESULT:";
-
-            // POSTメソッド用のインサート用のパラメーター取得
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            string result = data?.Result;
-
-            // パラメーターが設定されていない場合はエラーメッセージを返す
-            if (string.IsNullOrWhiteSpace(result))
-            {
-                responseMessage = "結果が指定されていません";
-                return new BadRequestObjectResult(responseMessage);
-            }
-
-            try
-            {
-                // DB接続設定（接続文字列の構築）
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder
-                {
-                    DataSource = "m3h-tomokimure-server.database.windows.net",
-                    UserID = "torutoru2004",
-                    Password = "Tomoki0526",
-                    InitialCatalog = "m3h-Tomoki-ultimateDB"
-                };
-
-                // SQLコネクションを初期化
-                using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
-                {
-                    // 実行するSQL（パラメーター付き）
-                    string sql = "INSERT INTO FortuneResults (Result) VALUES (@Result)";
-
-                    // SQLコマンドを初期化
-                    using (SqlCommand command = new SqlCommand(sql, connection))
-                    {
-                        // パラメーターを設定
-                        command.Parameters.AddWithValue("@Result", result);
-
-                        // コネクションオープン（＝ SQL Database に接続）
-                        await connection.OpenAsync();
-
-                        // SQLコマンドを実行し結果行数を取得
-                        int resultCount = await command.ExecuteNonQueryAsync();
-
-                        // 結果をレスポンスに格納
-                        responseMessage = responseMessage + $"{resultCount} 行挿入されました";
-                    }
-                }
-            }
-            catch (SqlException e)
-            {
-                // エラーをレスポンスに格納
-                responseMessage = "データベースエラーが発生しました: " + e.Message;
-                log.LogError(e.ToString());
-            }
-
-            // HTTPレスポンスを返却
-            return new OkObjectResult(responseMessage);
-        }
-
-        [FunctionName("GET_FORTUNE_RESULTS")]
-        public static async Task<IActionResult> GetFortuneResults(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req,
-            ILogger log)
-        {
-            log.LogInformation("C# HTTP trigger function processed a request.");
-
-            try
-            {
-                // DB接続設定（接続文字列の構築）
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder
-                {
-                    DataSource = "m3h-tomokimure-server.database.windows.net",
-                    UserID = "torutoru2004",
-                    Password = "Tomoki0526",
-                    InitialCatalog = "m3h-Tomoki-ultimateDB"
-                };
-
-                // SQLコネクションを初期化
-                using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
-                {
-                    // 実行するSQL
-                    string sql = "SELECT * FROM FortuneResults";
-
-                    // SQLコマンドを初期化
-                    using (SqlCommand command = new SqlCommand(sql, connection))
-                    {
-                        // コネクションオープン（＝ SQL Database に接続）
-                        await connection.OpenAsync();
-
-                        // SQLコマンドを実行し、結果を取得
-                        using (SqlDataReader reader = await command.ExecuteReaderAsync())
-                        {
-                            var results = new List<object>();
-                            while (await reader.ReadAsync())
-                            {
-                                results.Add(new
-                                {
-                                    Id = reader["Id"],
-                                    Result = reader["Result"]
-                                });
-                            }
-
-                            return new OkObjectResult(results);
-                        }
-                    }
-                }
-            }
-            catch (SqlException e)
-            {
-                // エラーをレスポンスに格納
-                log.LogError(e.ToString());
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
-            }
-        }
+  <!-- Custom Styles -->
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
     }
-}
+
+    #app {
+      position: relative;
+      height: 100vh;
+      background-image: url('kadai_shrine.jpg');
+      background-size: cover;
+    }
+
+    .fortuneArea {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .showResult_text {
+      margin-top: 10px;
+      font-family: "MS Mincho", serif;
+      font-weight: 1000;
+      font-size: 150px;
+      background-color: antiquewhite;
+      animation: zoomIn 0.5s forwards ease-in-out;
+      opacity: 0;
+    }
+
+    .shareButton_X {
+      background-color: black !important;
+      color: white !important;
+    }
+
+    @keyframes zoomIn {
+      0% {
+        transform: scale(0.1);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <v-app>
+      <div class="fortuneArea">
+        <v-btn large color="green" @click="drawFortune" class="fortuneBotton">
+          <span>早速占う</span>
+        </v-btn>
+        <p v-if="showResult" :key="resultKey" class="showResult_text">{{ fortuneResult }}</p>
+        <v-btn v-if="showResult" large @click="shareResult" class="shareButton_X">
+          <v-icon left>mdi-twitter</v-icon>
+          結果をXでシェアする
+        </v-btn>
+      </div>
+    </v-app>
+  </div>
+
+  <audio id="clickSound">
+    <source src="Ou_sound.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <!-- Vue.js -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  
+  <!-- Vuetify JS -->
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+
+  <script>
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+      data: {
+        fortunes: [],
+        fortuneResult: '',
+        showResult: false,
+        resultKey: ''
+      },
+      created() {
+        this.fetchFortuneResults();
+      },
+      methods: {
+        async fetchFortuneResults() {
+          try {
+            const response = await fetch('https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/GET_FORTUNE_RESULTS');
+            const data = await response.json();
+            this.fortunes = data.map(item => item.Result);
+          } catch (error) {
+            console.error('Error fetching fortune results:', error);
+          }
+        },
+        drawFortune() {
+          this.playClickSound();
+
+          const randomIndex = Math.floor(Math.random() * this.fortunes.length);
+          this.fortuneResult = this.fortunes[randomIndex];
+          this.showResult = true;
+          this.resultKey = Date.now().toString(); // Generate a unique key for each result display
+        },
+        shareResult() {
+          const textToShare = `今日のおみくじの結果は「${this.fortuneResult}」でした！`;
+          const urlToShare = 'https://your-website-url.com/';
+          const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(textToShare)}&url=${encodeURIComponent(urlToShare)}`;
+          window.open(twitterUrl, '_blank');
+        },
+        playClickSound() {
+          const audio = document.getElementById('clickSound');
+          audio.play();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
