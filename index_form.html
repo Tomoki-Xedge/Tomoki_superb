@@ -1,264 +1,70 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Microsoft.Data.SqlClient; // DB接続用ライブラリ
-using Newtonsoft.Json;
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <title>おみくじアプリ</title>
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <v-app>
+      <v-container>
+        <v-row>
+          <v-col cols="12" md="6" offset-md="3">
+            <v-card>
+              <v-card-title class="text-h5">おみくじアプリ</v-card-title>
+              <v-card-subtitle>結果を取得して表示します</v-card-subtitle>
+              <v-card-actions>
+                <v-btn @click="fetchFortuneResults" color="primary">おみくじを引く</v-btn>
+              </v-card-actions>
+              <v-card-text>
+                <v-list>
+                  <v-list-item-group v-if="results.length > 0">
+                    <v-list-item v-for="(result, index) in results" :key="index">
+                      {{ result }}
+                    </v-list-item>
+                  </v-list-item-group>
+                  <v-list-item v-else>
+                    <v-list-item-content>結果がありません</v-list-item-content>
+                  </v-list-item>
+                </v-list>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-app>
+  </div>
 
-namespace FunctionAPIApp
-{
-    public static class Function1
-    {
-        // 認証機能 (SELECT)
-        [FunctionName("SELECT")]
-        public static async Task<IActionResult> RunSelect(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
-            ILogger log)
-        {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
 
-            // インサート用のパラメーター取得（GETメソッド用）
-            string id = req.Query["ID"];
-            string password = req.Query["Password"];
-
-            // インサート用のパラメーター取得（POSTメソッド用）
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            id = id ?? data?.ID;
-            password = password ?? data?.Password;
-
-            // パラメーターが設定されていない場合はエラーメッセージを返す
-            if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(password))
-            {
-                log.LogError("ID または Password が指定されていません。");
-                return new BadRequestObjectResult(new
-                {
-                    Message = "ID または Password が指定されていません。",
-                    StatusCode = StatusCodes.Status400BadRequest
-                });
+  <script>
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+      data() {
+        return {
+          results: []
+        };
+      },
+      methods: {
+        async fetchFortuneResults() {
+          try {
+            const response = await fetch('https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/GET_FORTUNE_RESULTS');
+            if (!response.ok) {
+              throw new Error('ネットワークエラー');
             }
-
-            try
-            {
-                // DB接続設定（接続文字列の構築）
-                string connectionString = Environment.GetEnvironmentVariable("SQL_CONNECTION_STRING");
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    // 実行するクエリ（パラメーター化）
-                    string sql = "SELECT COUNT(1) FROM MemberTable WHERE ID = @ID AND Password = @Password";
-
-                    // SQL実行オブジェクトの初期化
-                    using (SqlCommand command = new SqlCommand(sql, connection))
-                    {
-                        // パラメーターの追加
-                        command.Parameters.AddWithValue("@ID", id);
-                        command.Parameters.AddWithValue("@Password", password);
-
-                        // DBと接続
-                        await connection.OpenAsync();
-
-                        // SQLを実行し、結果を確認
-                        int count = (int)await command.ExecuteScalarAsync();
-
-                        if (count > 0)
-                        {
-                            // IDとPasswordが一致する場合
-                            return new OkObjectResult(new
-                            {
-                                Message = "OK",
-                                StatusCode = StatusCodes.Status200OK
-                            });
-                        }
-                        else
-                        {
-                            // IDまたはPasswordが一致しない場合
-                            return new UnauthorizedObjectResult(new
-                            {
-                                Message = "ID または Password が一致しません。",
-                                StatusCode = StatusCodes.Status401Unauthorized
-                            });
-                        }
-                    }
-                }
-            }
-            catch (SqlException e)
-            {
-                // エラーをログに出力
-                log.LogError(e.ToString());
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
-            }
+            const data = await response.json();
+            this.results = data;
+          } catch (error) {
+            console.error('エラー:', error);
+            alert('おみくじの結果を取得できませんでした。');
+          }
         }
-
-        // ユーザー情報挿入 (INSERT)
-        [FunctionName("INSERT")]
-        public static async Task<IActionResult> RunInsert(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
-            ILogger log)
-        {
-            log.LogInformation("C# HTTP trigger function processed a request.");
-
-            // HTTPレスポンスで返す文字列を定義
-            string responseMessage = "INSERT RESULT:";
-
-            // POSTメソッド用のインサート用のパラメーター取得
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            string nickname = data?.Nickname;
-            string id = data?.ID;
-            string password = data?.Password;
-
-            // パラメーターが全て取得できた場合のみ処理
-            if (!string.IsNullOrWhiteSpace(nickname) && !string.IsNullOrWhiteSpace(id) && !string.IsNullOrWhiteSpace(password))
-            {
-                try
-                {
-                    // DB接続設定（接続文字列の構築）
-                    string connectionString = Environment.GetEnvironmentVariable("SQL_CONNECTION_STRING");
-                    using (SqlConnection connection = new SqlConnection(connectionString))
-                    {
-                        // 実行するSQL（パラメーター付き）
-                        string sql = "INSERT INTO MemberTable (Nickname, ID, Password) VALUES (@Nickname, @ID, @Password)";
-
-                        // SQLコマンドを初期化
-                        using (SqlCommand command = new SqlCommand(sql, connection))
-                        {
-                            // パラメーターを設定
-                            command.Parameters.AddWithValue("@Nickname", nickname);
-                            command.Parameters.AddWithValue("@ID", id);
-                            command.Parameters.AddWithValue("@Password", password);
-
-                            // コネクションオープン（＝ SQL Database に接続）
-                            await connection.OpenAsync();
-
-                            // SQLコマンドを実行し結果行数を取得
-                            int result = await command.ExecuteNonQueryAsync();
-
-                            // 結果をレスポンスに格納
-                            responseMessage = responseMessage + $"{result} 行挿入されました";
-                        }
-                    }
-                }
-                // DB処理でエラーが発生した場合
-                catch (SqlException e)
-                {
-                    // エラーをレスポンスに格納
-                    responseMessage = "データベースエラーが発生しました: " + e.Message;
-                    log.LogError(e.ToString());
-                }
-            }
-            else
-            {
-                responseMessage = "必要なパラメーターが設定されていません";
-            }
-
-            // HTTPレスポンスを返却
-            return new OkObjectResult(responseMessage);
-        }
-
-        // おみくじの結果挿入 (INSERT_FORTUNE)
-        [FunctionName("INSERT_FORTUNE")]
-        public static async Task<IActionResult> InsertFortune(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
-            ILogger log)
-        {
-            log.LogInformation("C# HTTP trigger function processed a request.");
-
-            // POSTメソッド用のインサート用のパラメーター取得
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            string result = data?.Result;
-
-            // パラメーターが設定されていない場合はエラーメッセージを返す
-            if (string.IsNullOrWhiteSpace(result))
-            {
-                log.LogError("結果が指定されていません");
-                return new BadRequestObjectResult("結果が指定されていません");
-            }
-
-            try
-            {
-                // DB接続設定（接続文字列の構築）
-                string connectionString = Environment.GetEnvironmentVariable("SQL_CONNECTION_STRING");
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    // 実行するSQL（パラメーター付き）
-                    string sql = "INSERT INTO FortuneResults (Result) VALUES (@Result)";
-
-                    // SQLコマンドを初期化
-                    using (SqlCommand command = new SqlCommand(sql, connection))
-                    {
-                        // パラメーターを設定
-                        command.Parameters.AddWithValue("@Result", result);
-
-                        // コネクションオープン（＝ SQL Database に接続）
-                        await connection.OpenAsync();
-
-                        // SQLコマンドを実行し結果行数を取得
-                        int resultCount = await command.ExecuteNonQueryAsync();
-
-                        // 結果をレスポンスに格納
-                        return new OkObjectResult($"{resultCount} 行挿入されました");
-                    }
-                }
-            }
-            catch (SqlException e)
-            {
-                // エラーをレスポンスに格納
-                log.LogError(e.ToString());
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
-            }
-        }
-
-        // おみくじの結果取得 (GET_FORTUNE_RESULTS)
-        [FunctionName("GET_FORTUNE_RESULTS")]
-        public static async Task<IActionResult> GetFortuneResults(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req,
-            ILogger log)
-        {
-            log.LogInformation("C# HTTP trigger function processed a request.");
-
-            try
-            {
-                // DB接続設定（接続文字列の構築）
-                string connectionString = Environment.GetEnvironmentVariable("SQL_CONNECTION_STRING");
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    // SQLクエリの定義
-                    string sql = "SELECT Result FROM FortuneResults";
-
-                    // SQLコマンドの初期化
-                    using (SqlCommand command = new SqlCommand(sql, connection))
-                    {
-                        // データベース接続のオープン
-                        await connection.OpenAsync();
-
-                        // クエリの実行と結果の取得
-                        using (var reader = await command.ExecuteReaderAsync())
-                        {
-                            var results = new List<string>();
-
-                            while (await reader.ReadAsync())
-                            {
-                                results.Add(reader.GetString(0));
-                            }
-
-                            // 結果をレスポンスとして返す
-                            return new OkObjectResult(results);
-                        }
-                    }
-                }
-            }
-            catch (SqlException e)
-            {
-                // エラーログを出力し、500エラーを返す
-                log.LogError(e.ToString());
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
-            }
-        }
-    }
-}
+      }
+    });
+  </script>
+</body>
+</html>
