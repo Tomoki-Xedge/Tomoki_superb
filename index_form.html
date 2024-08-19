@@ -1,3 +1,5 @@
+0815 更新版 index_form
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -16,16 +18,6 @@
       padding: 15px;
       border: 1px solid #ddd;
       border-radius: 4px;
-      background: #f9f9f9;
-    }
-    .post-item h3 {
-      margin: 0;
-      font-size: 16px;
-      color: #333;
-    }
-    .post-item p {
-      margin: 5px 0;
-      color: #555;
     }
   </style>
 </head>
@@ -33,48 +25,33 @@
   <div id="app">
     <v-app>
       <v-container class="container">
-        <!-- コンテンツ -->
-        <v-card>
-          <v-card-title>
-            <h1>掲示板</h1>
-          </v-card-title>
-          
-          <!-- 投稿フォーム -->
-          <v-card-subtitle>
-            <v-form>
-              <v-text-field
-                v-model="newPost.nickname"
-                label="ニックネーム"
-                required
-              ></v-text-field>
-              <v-textarea
-                v-model="newPost.content"
-                label="内容"
-                rows="5"
-                required
-              ></v-textarea>
-              <v-btn @click="addPost" color="primary">投稿</v-btn>
-            </v-form>
-          </v-card-subtitle>
+        <!-- 投稿フォーム -->
+        <v-form>
+          <v-textarea
+            v-model="newPost.content"
+            label="内容"
+            rows="5"
+            required
+          ></v-textarea>
+          <v-btn @click="addPost" color="primary">投稿</v-btn>
+        </v-form>
 
-          <!-- 投稿リスト -->
-          <v-divider></v-divider>
-          <v-list>
-            <v-list-item-group v-if="posts.length">
-              <v-list-item v-for="(post, index) in posts" :key="index">
-                <v-list-item-content>
-                  <v-list-item-title>{{ post.nickname }}</v-list-item-title>
-                  <v-list-item-subtitle>{{ post.content }}</v-list-item-subtitle>
-                </v-list-item-content>
-              </v-list-item>
-            </v-list-item-group>
-            <v-list-item v-else>
+        <!-- 投稿リスト -->
+        <v-divider></v-divider>
+        <v-list>
+          <v-list-item-group v-if="posts.length">
+            <v-list-item v-for="(post, index) in posts" :key="index">
               <v-list-item-content>
-                <v-list-item-title>投稿はまだありません</v-list-item-title>
+                <v-list-item-subtitle>{{ post.content }}</v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
-          </v-list>
-        </v-card>
+          </v-list-item-group>
+          <v-list-item v-else>
+            <v-list-item-content>
+              <v-list-item-title>投稿はまだありません</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
       </v-container>
     </v-app>
   </div>
@@ -89,84 +66,22 @@
       data() {
         return {
           newPost: {
-            nickname: '',
             content: ''
           },
           posts: []
         };
       },
       methods: {
-        async addPost() {
-          if (this.newPost.nickname && this.newPost.content) {
-            try {
-              // POSTリクエストをAPIに送信
-              const response = await fetch('https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/posts', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  // 'Authorization': 'Bearer YOUR_ACCESS_TOKEN' // 必要に応じて認証情報を追加
-                },
-                body: JSON.stringify({
-                  nickname: this.newPost.nickname,
-                  content: this.newPost.content
-                })
-              });
-              
-              const text = await response.text(); // レスポンスをテキストとして取得
-              console.log('Response Text:', text); // テキストをログに出力
-
-              let result;
-              try {
-                result = JSON.parse(text); // テキストをJSONにパース
-              } catch (e) {
-                console.error('Error parsing JSON:', e);
-                alert('投稿に失敗しました');
-                return;
-              }
-
-              if (response.ok) {
-                // 投稿が成功した場合、投稿をリストに追加
-                this.posts.push({
-                  nickname: this.newPost.nickname,
-                  content: this.newPost.content
-                });
-                // フォームをクリアする
-                this.newPost.nickname = '';
-                this.newPost.content = '';
-              } else {
-                alert('投稿に失敗しました');
-              }
-            } catch (error) {
-              console.error('Error:', error);
-              alert('投稿に失敗しました');
-            }
+        addPost() {
+          if (this.newPost.content) {
+            this.posts.push({
+              content: this.newPost.content
+            });
+            // フォームをクリアする
+            this.newPost.content = '';
           } else {
-            alert('ニックネームと内容を入力してください');
+            alert('内容を入力してください');
           }
-        }
-      },
-      async created() {
-        try {
-          // GETリクエストをAPIに送信して投稿リストを取得
-          const response = await fetch('https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/posts');
-          const text = await response.text(); // レスポンスをテキストとして取得
-          console.log('Response Text:', text); // テキストをログに出力
-
-          let result;
-          try {
-            result = JSON.parse(text); // テキストをJSONにパース
-          } catch (e) {
-            console.error('Error parsing JSON:', e);
-            return;
-          }
-
-          if (response.ok) {
-            this.posts = result; // APIから取得した投稿リストを設定
-          } else {
-            console.error('Failed to fetch posts');
-          }
-        } catch (error) {
-          console.error('Error:', error);
         }
       }
     });
