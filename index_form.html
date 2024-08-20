@@ -9,9 +9,10 @@
   <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"></script>
   <style>
     .v-application--wrap {
+      height: 100vh;
+      display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
     }
     
     #app {
@@ -53,9 +54,9 @@
 <div id="bird">
   <div id="app">
     <v-app>
-      <v-container>
-        <v-row class="d-flex justify-center">
-          <v-col cols="12" sm="6" md="4">
+      <v-container fill-height>
+        <v-row class="d-flex align-center justify-center" no-gutters>
+          <v-col cols="12" sm="6" md="4" class="d-flex align-center justify-center">
             <v-card>
               <!-- タイトルを削除 -->
               <!-- <v-card-title class="headline text-center">おみくじサイト</v-card-title> -->
