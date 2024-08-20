@@ -3,24 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"></script>
   <title>テスト</title>
   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"></script>
   <style>
     .v-application--wrap {
       align-items: center;
       justify-content: center;
       height: 100vh;
-    }    
-
+    }
+    
     #app {
-      background : rgba(0,0,0,0);
+      background: rgba(0,0,0,0);
+    }
+
+    .v-alert.success {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .v-alert.info {
+      background-color: #e3f2fd;
+      color: #0277bd;
+    }
+    
+    .v-alert {
+      transition: opacity 0.5s ease;
+    }
+
+    .v-alert-enter-active, .v-alert-leave-active {
+      transition: opacity 0.5s;
+    }
+    .v-alert-enter, .v-alert-leave-to /* .v-alert-leave-active in <2.1.8 */ {
+      opacity: 0;
     }
   </style>
 </head>
 <body>
-<div id="bird"></div>
+<div id="bird">
   <div id="app">
     <v-app>
       <v-container>
@@ -33,13 +54,17 @@
                 <v-btn @click="getFortune" color="primary" block>おみくじを引く</v-btn>
               </v-card-actions>
               <v-card-text>
-                <v-alert v-if="fortuneResult" type="success" border="left">
-                  <v-icon>mdi-luck</v-icon>
-                  <span>{{ fortuneResult }}</span>
-                </v-alert>
-                <v-alert v-else type="info" border="left">
-                  おみくじの結果がここに表示されます。
-                </v-alert>
+                <transition name="v-alert">
+                  <v-alert v-if="fortuneResult" type="success" border="left">
+                    <v-icon>mdi-luck</v-icon>
+                    <span>{{ fortuneResult }}</span>
+                  </v-alert>
+                </transition>
+                <transition name="v-alert">
+                  <v-alert v-else type="info" border="left">
+                    おみくじの結果がここに表示されます。
+                  </v-alert>
+                </transition>
               </v-card-text>
             </v-card>
           </v-col>
@@ -51,7 +76,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
-
   <script>
     new Vue({
       el: '#app',
@@ -89,9 +113,8 @@
         }
       }
     });
-  </script>
 
-  <script>
+    // VANTAの初期化
     VANTA.BIRDS({
       el: "#bird", 
       mouseControls: true,
