@@ -43,6 +43,10 @@
     .v-alert-enter, .v-alert-leave-to /* .v-alert-leave-active in <2.1.8 */ {
       opacity: 0;
     }
+
+    .headline {
+      text-align:center
+    }
   </style>
 </head>
 <body>
@@ -54,7 +58,6 @@
           <v-col cols="12" sm="6" md="4">
             <v-card>
               <v-card-title class="headline">おみくじサイト</v-card-title>
-              <v-card-subtitle>おみくじを引いて結果を見てみましょう！</v-card-subtitle>
               <v-card-actions>
                 <v-btn @click="getFortune" color="primary" block>おみくじを引く</v-btn>
               </v-card-actions>
