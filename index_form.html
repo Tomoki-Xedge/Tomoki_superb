@@ -21,15 +21,20 @@
     .v-alert.success {
       background-color: #e8f5e9;
       color: #2e7d32;
+      box-shadow: none; /* Remove border */
     }
 
     .v-alert.info {
       background-color: #e3f2fd;
       color: #0277bd;
+      box-shadow: none; /* Remove border */
     }
     
     .v-alert {
       transition: opacity 0.5s ease;
+      border-radius: 8px; /* Rounded corners */
+      padding: 16px; /* Padding inside alert */
+      margin-bottom: 16px; /* Space between alerts */
     }
 
     .v-alert-enter-active, .v-alert-leave-active {
