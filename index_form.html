@@ -3,17 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
-  <title>おみくじサイト</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"></script>
+  <title>テスト</title>
   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
   <style>
     .v-application--wrap {
       align-items: center;
       justify-content: center;
       height: 100vh;
+    }    
+
+    #app {
+      background : rgba(0,0,0,0);
     }
   </style>
 </head>
 <body>
+<div id="bird"></div>
   <div id="app">
     <v-app>
       <v-container>
@@ -40,9 +47,11 @@
       </v-container>
     </v-app>
   </div>
+</div>
 
   <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+
   <script>
     new Vue({
       el: '#app',
@@ -79,6 +88,19 @@
           }
         }
       }
+    });
+  </script>
+
+  <script>
+    VANTA.BIRDS({
+      el: "#bird", 
+      mouseControls: true,
+      touchControls: true,
+      gyroControls: false,
+      minHeight: 585.00,
+      minWidth: 200.00,
+      scale: 1.00,
+      scaleMobile: 1.00
     });
   </script>
 </body>

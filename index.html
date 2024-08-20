@@ -29,6 +29,14 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
+    .form-title {
+      text-align: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #000000; /* 色を濃い黒に変更 */
+      font-weight: bold; /* 文字を太くする */
+    }
+
     .member-signup {
       display: block;
       margin-top: 15px;
@@ -48,6 +56,9 @@
         <v-row>
           <v-col cols="12">
             <v-form class="login-form">
+              <!-- タイトルを追加 -->
+              <div class="form-title">ログイン</div>
+              
               <v-text-field
                 label="ID"
                 v-model="id"
