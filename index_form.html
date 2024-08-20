@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
-  <title>テスト</title>
+  <title>おみくじサイト</title>
   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"></script>
@@ -18,41 +18,34 @@
       background: rgba(0,0,0,0);
     }
 
+    /* カスタムスタイル */
     .v-alert.success {
-      background-color: #e8f5e9;
-      color: #2e7d32;
-      box-shadow: none; /* Remove border */
+      background-color: transparent; /* 背景色を透明にする */
+      color: #2e7d32; /* テキストカラーを設定 */
+      border: none; /* ボーダーを削除 */
+      box-shadow: none; /* シャドウを削除 */
     }
 
     .v-alert.info {
-      background-color: #e3f2fd;
-      color: #0277bd;
-      box-shadow: none; /* Remove border */
+      background-color: transparent; /* 背景色を透明にする */
+      color: #0277bd; /* テキストカラーを設定 */
+      border: none; /* ボーダーを削除 */
+      box-shadow: none; /* シャドウを削除 */
     }
-    
+
     .v-alert {
       transition: opacity 0.5s ease;
-      border-radius: 8px; /* Rounded corners */
-      padding: 16px; /* Padding inside alert */
-      margin-bottom: 16px; /* Space between alerts */
+      border-radius: 8px; /* 丸みを帯びた角 */
+      padding: 16px; /* 内側のパディング */
+      margin-bottom: 16px; /* アラート間のスペース */
     }
 
     .v-alert-enter-active, .v-alert-leave-active {
       transition: opacity 0.5s;
     }
+
     .v-alert-enter, .v-alert-leave-to /* .v-alert-leave-active in <2.1.8 */ {
       opacity: 0;
-    }
-
-    .v-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-
-    .v-card-title {
-      margin: 0;
     }
   </style>
 </head>
@@ -64,19 +57,20 @@
         <v-row class="d-flex justify-center">
           <v-col cols="12" sm="6" md="4">
             <v-card>
-              <v-card-title class="headline">おみくじサイト</v-card-title>
+              <!-- タイトルを削除 -->
+              <!-- <v-card-title class="headline text-center">おみくじサイト</v-card-title> -->
               <v-card-actions>
                 <v-btn @click="getFortune" color="primary" block>おみくじを引く</v-btn>
               </v-card-actions>
               <v-card-text>
                 <transition name="v-alert">
-                  <v-alert v-if="fortuneResult" type="success" border="left">
+                  <v-alert v-if="fortuneResult" type="success">
                     <v-icon>mdi-luck</v-icon>
                     <span>{{ fortuneResult }}</span>
                   </v-alert>
                 </transition>
                 <transition name="v-alert">
-                  <v-alert v-else type="info" border="left">
+                  <v-alert v-else type="info">
                     おみくじの結果がここに表示されます。
                   </v-alert>
                 </transition>
@@ -89,57 +83,61 @@
   </div>
 </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
-  <script>
-    new Vue({
-      el: '#app',
-      vuetify: new Vuetify(),
-      data() {
-        return {
-          fortuneResult: null
-        };
-      },
-      methods: {
-        async getFortune() {
-          try {
-            // APIのURL
-            const apiUrl = 'https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/GET_FORTUNE_RESULT';
+<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+<script>
+  new Vue({
+    el: '#app',
+    vuetify: new Vuetify(),
+    data() {
+      return {
+        fortuneResult: null,
+        audio: new Audio('Result_click_sound.mp3') // 音声ファイルの初期化
+      };
+    },
+    methods: {
+      async getFortune() {
+        try {
+          // 音声を再生
+          this.audio.play();
+          
+          // APIのURL
+          const apiUrl = 'https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/GET_FORTUNE_RESULT';
 
-            // APIからデータを取得
-            const response = await fetch(apiUrl);
-            
-            if (!response.ok) {
-              throw new Error(`HTTPエラー！ ステータスコード: ${response.status}`);
-            }
-
-            // JSON形式でレスポンスを解析
-            const data = await response.json();
-            console.log(data);  
-
-            // 結果を表示
-            this.fortuneResult = data.fortuneResult;
-
-          } catch (error) {
-            // エラーが発生した場合
-            console.error('エラー:', error);
-            this.fortuneResult = 'おみくじ結果を取得できませんでした。';
+          // APIからデータを取得
+          const response = await fetch(apiUrl);
+          
+          if (!response.ok) {
+            throw new Error(`HTTPエラー！ ステータスコード: ${response.status}`);
           }
+
+          // JSON形式でレスポンスを解析
+          const data = await response.json();
+          console.log(data);  
+
+          // 結果を表示
+          this.fortuneResult = data.fortuneResult;
+
+        } catch (error) {
+          // エラーが発生した場合
+          console.error('エラー:', error);
+          this.fortuneResult = 'おみくじ結果を取得できませんでした。';
         }
       }
-    });
+    }
+  });
 
-    // VANTAの初期化
-    VANTA.BIRDS({
-      el: "#bird", 
-      mouseControls: true,
-      touchControls: true,
-      gyroControls: false,
-      minHeight: 585.00,
-      minWidth: 200.00,
-      scale: 1.00,
-      scaleMobile: 1.00
-    });
-  </script>
+  // VANTAの初期化
+  VANTA.BIRDS({
+    el: "#bird", 
+    mouseControls: true,
+    touchControls: true,
+    gyroControls: false,
+    minHeight: 585.00,
+    minWidth: 200.00,
+    scale: 1.00,
+    scaleMobile: 1.00
+  });
+</script>
 </body>
 </html>
