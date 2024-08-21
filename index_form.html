@@ -7,59 +7,24 @@
   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"></script>
-  <style>
-    .v-application--wrap {
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
+  <style>   
     #app {
       background: rgba(0,0,0,0);
     }
 
-    /* カスタムスタイル */
-    .v-alert.success {
-      background-color: transparent; /* 背景色を透明にする */
-      color: #2e7d32; /* テキストカラーを設定 */
-      border: none; /* ボーダーを削除 */
-      box-shadow: none; /* シャドウを削除 */
-    }
-
-    .v-alert.info {
-      background-color: transparent; /* 背景色を透明にする */
-      color: #0277bd; /* テキストカラーを設定 */
-      border: none; /* ボーダーを削除 */
-      box-shadow: none; /* シャドウを削除 */
-    }
-
-    .v-alert {
-      transition: opacity 0.5s ease;
-      border-radius: 8px; /* 丸みを帯びた角 */
-      padding: 16px; /* 内側のパディング */
-      margin-bottom: 16px; /* アラート間のスペース */
-    }
-
-    .v-alert-enter-active, .v-alert-leave-active {
-      transition: opacity 0.5s;
-    }
-
-    .v-alert-enter, .v-alert-leave-to /* .v-alert-leave-active in <2.1.8 */ {
-      opacity: 0;
-    }
+    #app[v-cloak] {
+      display: none;
+    }    
   </style>
 </head>
 <body>
 <div id="bird">
-  <div id="app">
+  <div id="app" v-cloak>
     <v-app>
       <v-container fill-height>
         <v-row class="d-flex align-center justify-center" no-gutters>
           <v-col cols="12" sm="6" md="4" class="d-flex align-center justify-center">
             <v-card>
-              <!-- タイトルを削除 -->
-              <!-- <v-card-title class="headline text-center">おみくじサイト</v-card-title> -->
               <v-card-actions>
                 <v-btn @click="getFortune" color="primary" block>おみくじを引く</v-btn>
               </v-card-actions>
@@ -122,7 +87,7 @@
         } catch (error) {
           // エラーが発生した場合
           console.error('エラー:', error);
-          this.fortuneResult = 'おみくじ結果を取得できませんでした。';
+          this.fortuneResult = '結果';
         }
       }
     }
