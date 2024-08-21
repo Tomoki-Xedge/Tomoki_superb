@@ -85,7 +85,6 @@
           </v-row>
           <v-row class="d-flex align-center justify-center">
             <v-col class="d-flex align-center justify-center">
-              <!-- 結果が表示されたときのみツイートボタンを表示 -->
               <div class="twitter-share-button" v-if="fortuneResult">
                 <a :href="twitterShareUrl" target="_blank">
                   <i class="fab fa-twitter"></i>
@@ -110,10 +109,10 @@
     data() {
       return {
         fortuneResult: null,
-        audio: new Audio('Result_click_sound.mp3'), // クリック時
-        apiUrl: 'https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/GET_FORTUNE_RESULT', // APIのURL
-        tweetText: 'おみくじの結果: ', // ツイートするテキストの初期値
-        pageUrl: window.location.href // 現在のページURL
+        audio: new Audio('Result_click_sound.mp3'), // クリック時の音声
+        apiUrl: 'https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/GET_FORTUNE_RESULT', 
+        tweetText: 'おみくじの結果: ', 
+        pageUrl: window.location.href 
       };
     },
     computed: {
@@ -124,25 +123,22 @@
     methods: {
       async getFortune() {
         try {
-          // 音声を再生
+          
           this.audio.play();
           
-          // APIからデータを取得
           const response = await fetch(this.apiUrl);
           
           if (!response.ok) {
             throw new Error(`HTTPエラー！ ステータスコード: ${response.status}`);
           }
 
-          // JSON形式でレスポンスを解析
           const data = await response.json();
           console.log(data);  
 
-          // 結果を表示
           this.fortuneResult = data.fortuneResult;
 
         } catch (error) {
-          // エラーが発生時
+          // エラー発生時
           console.error('エラー:', error);
           this.fortuneResult = '結果';
         }
