@@ -9,45 +9,55 @@
   <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"></script>
   <style>   
     #app {
-      background: rgba(0,0,0,0);
+      background: rgba(0,0,0,0);  
     }
 
     #app[v-cloak] {
       display: none;
-    }    
+    }
+
+    v-card-text {
+      text-align:center
+    }
+
+    .success-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px; /* 必要に応じて調整 */
+    color: green; /* 必要に応じて色を調整 */
+}
+    
   </style>
 </head>
 <body>
-<div id="bird">
-  <div id="app" v-cloak>
-    <v-app>
-      <v-container fill-height>
-        <v-row class="d-flex align-center justify-center" no-gutters>
-          <v-col cols="12" sm="6" md="4" class="d-flex align-center justify-center">
-            <v-card>
-              <v-card-actions>
-                <v-btn @click="getFortune" color="primary" block>おみくじを引く</v-btn>
-              </v-card-actions>
-              <v-card-text>
-                <transition name="v-alert">
-                  <v-alert v-if="fortuneResult" type="success">
-                    <v-icon>mdi-luck</v-icon>
-                    <span>{{ fortuneResult }}</span>
-                  </v-alert>
-                </transition>
-                <transition name="v-alert">
-                  <v-alert v-else type="info">
-                    おみくじの結果がここに表示されます。
-                  </v-alert>
-                </transition>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-app>
+  
+  <div id="bird">
+    <div id="app" v-cloak>
+      <v-app>
+        <v-container fill-height>
+          <v-row class="d-flex align-center justify-center">
+            <v-col class="d-flex align-center justify-center">
+              <v-card>
+                <v-card-actions>
+                  <v-btn @click="getFortune" color="primary" block>おみくじを引く</v-btn>
+                </v-card-actions>
+                <v-card-text>
+                  <transition name="fade">
+                    <span v-if="fortuneResult" class="success-text">
+                      <v-icon>mdi-luck</v-icon>
+                      {{ fortuneResult }}
+                    </span>
+                  </transition>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-app>
+    </div>
   </div>
-</div>
+  
 
 <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
@@ -58,7 +68,7 @@
     data() {
       return {
         fortuneResult: null,
-        audio: new Audio('Result_click_sound.mp3') // 音声ファイルの初期化
+        audio: new Audio('Result_click_sound.mp3') // クリック時
       };
     },
     methods: {
@@ -85,7 +95,7 @@
           this.fortuneResult = data.fortuneResult;
 
         } catch (error) {
-          // エラーが発生した場合
+          // エラーが発生時
           console.error('エラー:', error);
           this.fortuneResult = '結果';
         }
@@ -93,8 +103,7 @@
     }
   });
 
-  // VANTAの初期化
-  VANTA.BIRDS({
+ VANTA.BIRDS({
     el: "#bird", 
     mouseControls: true,
     touchControls: true,
