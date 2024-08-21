@@ -10,82 +10,96 @@
     [v-cloak] {
       display: none;
     }
-    
+
     /* 全体のスタイル設定 */
     body, html {
       margin: 0;
       padding: 0;
       height: 100%;
-      background-color: #f0f0f0;
-      font-family: Arial, sans-serif;
-    }
-    
-    /* メッセージコンテナのスタイル設定 */
-    .completion-message {
       width: 100%;
-      max-width: 500px;
-      margin: 50px auto; /* 上下に50pxのマージン、中央揃え */
+      background-color: #f0f0f0;
+      overflow: hidden; /* スクロールを無効化 */
+    }
+
+    /* コンテナのスタイル設定 */
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100vw;
+      background-color: #f0f0f0;
+      padding: 20px; /* 内側の余白 */
+      box-sizing: border-box; /* パディングを含めて全体の幅を計算 */
+    }
+
+    /* カードのスタイル設定 */
+    .content {
+      width: 100%;
+      max-width: 400px;
       padding: 20px;
       background-color: #ffffff;
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
-    .completion-title {
+    .headline {
+      font-size: 24px;
       margin-bottom: 20px;
-      font-size: 1.5em;
+      color: #000000;
       font-weight: bold;
-      text-align: center; /* テキストを中央揃え */
     }
 
-    .completion-subtitle {
-      margin-bottom: 20px;
-      font-size: 1.2em;
-      text-align: center; /* テキストを中央揃え */
+    .v-icon {
+      color: #4caf50; /* Material Designのグリーン */
     }
 
-    .back-link {
-      display: block;
-      margin-top: 15px;
-      color: #007bff;
-      text-decoration: none;
-      text-align: center; /* リンクを中央揃え */
-    }
-    .back-link:hover {
-      text-decoration: underline;
+    .v-btn {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 300px; /* ボタンの最大幅 */
     }
   </style>
 </head>
 <body>
   <div id="app" v-cloak>
     <v-app>
-      <v-container fluid>
-        <v-row>
-          <v-col cols="12">
-            <v-card class="completion-message" flat>
-              <v-card-title class="completion-title">
-                会員登録が完了しました
-              </v-card-title>
-              <v-card-subtitle class="completion-subtitle">
-                ご登録ありがとうございます！<br>
-                登録が正常に完了しました。<br>
-                これからログインしてご利用ください。
-              </v-card-subtitle>
-              <a href="index_SignUp.html" class="back-link">ログインページに戻る</a>
-            </v-card>
-          </v-col>
-        </v-row>
+      <v-container class="container" fluid>
+        <v-card class="content">
+          <v-card-title class="headline">
+            登録が完了しました
+          </v-card-title>
+          <v-card-subtitle>
+            <v-icon large>mdi-check-circle</v-icon>
+          </v-card-subtitle>
+          <v-card-text>
+            <p>登録が成功しました。</p>
+            <p>下記よりログインしてください。</p>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn color="primary" @click="goToLogin">ログインフォームへ</v-btn>
+          </v-card-actions>
+        </v-card>
       </v-container>
     </v-app>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+
   <script>
     new Vue({
       el: '#app',
-      vuetify: new Vuetify()
+      vuetify: new Vuetify(),
+      methods: {
+        goToLogin() {
+          window.location.href = 'index.html'; // ログインフォームへの遷移
+        }
+      }
     });
   </script>
 </body>

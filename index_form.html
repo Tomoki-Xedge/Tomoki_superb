@@ -21,15 +21,45 @@
     }
 
     .success-text {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 10px 0px 10px 0px;
-    font-family: 'Times New Roman', serif;
-    font-size:65px;
-    color: black; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 80px;
+      font-family: 'Times New Roman', serif;
+      font-size:150px;
+      color: black; 
     }
-    </style>
+
+    .twitter-share-button {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .twitter-share-button a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      background: linear-gradient(90deg, #1DA1F2, #1A91DA);
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: bold;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+      transition: background 0.3s, transform 0.3s;
+    }
+
+    .twitter-share-button a:hover {
+      background: linear-gradient(90deg, #1A91DA, #1DA1F2);
+      transform: scale(1.05);
+    }
+
+    .twitter-share-button i {
+      margin-right: 10px;
+      font-size: 20px;
+    }
+  </style>
 </head>
 <body>
   <div id="bird">
@@ -53,6 +83,17 @@
               </v-card>
             </v-col>
           </v-row>
+          <v-row class="d-flex align-center justify-center">
+            <v-col class="d-flex align-center justify-center">
+              <!-- 結果が表示されたときのみツイートボタンを表示 -->
+              <div class="twitter-share-button" v-if="fortuneResult">
+                <a :href="twitterShareUrl" target="_blank">
+                  <i class="fab fa-twitter"></i>
+                  結果をポストする
+                </a>
+              </div>
+            </v-col>
+          </v-row>
         </v-container>
       </v-app>
     </div>
@@ -61,6 +102,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
 <script>
   new Vue({
     el: '#app',
@@ -68,8 +110,16 @@
     data() {
       return {
         fortuneResult: null,
-        audio: new Audio('Result_click_sound.mp3') // クリック時
+        audio: new Audio('Result_click_sound.mp3'), // クリック時
+        apiUrl: 'https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/GET_FORTUNE_RESULT', // APIのURL
+        tweetText: 'おみくじの結果: ', // ツイートするテキストの初期値
+        pageUrl: window.location.href // 現在のページURL
       };
+    },
+    computed: {
+      twitterShareUrl() {
+        return `https://twitter.com/intent/tweet?text=${encodeURIComponent(this.tweetText + (this.fortuneResult || ''))}&url=${encodeURIComponent(this.pageUrl)}`;
+      }
     },
     methods: {
       async getFortune() {
@@ -77,11 +127,8 @@
           // 音声を再生
           this.audio.play();
           
-          // APIのURL
-          const apiUrl = 'https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/GET_FORTUNE_RESULT';
-
           // APIからデータを取得
-          const response = await fetch(apiUrl);
+          const response = await fetch(this.apiUrl);
           
           if (!response.ok) {
             throw new Error(`HTTPエラー！ ステータスコード: ${response.status}`);
@@ -103,7 +150,7 @@
     }
   });
 
- VANTA.BIRDS({
+  VANTA.BIRDS({
     el: "#bird", 
     mouseControls: true,
     touchControls: true,
