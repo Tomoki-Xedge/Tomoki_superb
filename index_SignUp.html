@@ -174,7 +174,19 @@
             }, 2000);
           }
         } catch (error) {
-          formMessage.textContent = '送信中にエラーが発生しました: ' + error.message;
+          // エラーレスポンスの解析
+          if (error.response && error.response.data) {
+            const errorData = error.response.data;
+            if (errorData.Message.includes("ニックネーム")) {
+              nicknameError.textContent = errorData.Message;
+            } else if (errorData.Message.includes("ID")) {
+              idError.textContent = errorData.Message;
+            } else {
+              formMessage.textContent = errorData.Message;
+            }
+          } else {
+            formMessage.textContent = '送信中にエラーが発生しました: ' + (error.message || '不明なエラー');
+          }
           formMessage.style.color = 'red';
         }
       }
