@@ -101,25 +101,25 @@
   <script>
     document.getElementById('userForm').addEventListener('submit', async function(event) {
       event.preventDefault(); 
-  
+
       // 入力フィールドの取得
       const nickname = document.getElementById('nickname');
       const id = document.getElementById('id');
       const password = document.getElementById('password');
-  
+
       // エラーメッセージ要素の取得
       const nicknameError = document.getElementById('nicknameError');
       const idError = document.getElementById('idError');
       const passwordError = document.getElementById('passwordError');
       const formMessage = document.getElementById('formMessage');
-  
+
       nicknameError.textContent = '';
       idError.textContent = '';
       passwordError.textContent = '';
       formMessage.textContent = '';
-  
+
       let isValid = true;
-  
+
       // ニックネーム制御
       if (nickname.value.length === 0) {
         nicknameError.textContent = 'ニックネームは必須です';
@@ -128,7 +128,7 @@
         nicknameError.textContent = 'ニックネームは20文字以内で入力してください';
         isValid = false;
       }
-  
+
       // ID制御
       if (!/^[a-zA-Z0-9]*$/.test(id.value)) {
         idError.textContent = 'IDは英数字で入力してください';
@@ -140,7 +140,7 @@
         idError.textContent = 'IDは12文字以内で入力してください';
         isValid = false;
       }
-  
+
       // パスワード制御
       if (!/^[a-zA-Z0-9]*$/.test(password.value)) {
         passwordError.textContent = 'パスワードは英数字で入力してください';
@@ -152,44 +152,26 @@
         passwordError.textContent = 'パスワードは12文字以内で入力してください';
         isValid = false;
       }
-  
+
       if (isValid) {
         try {
-          // ユーザーのニックネームとIDの重複チェック
-          const checkResponse = await axios.post('https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/CheckDuplicates', {
+          const formData = {
             Nickname: nickname.value,
-            ID: id.value
-          });
-  
-          if (checkResponse.data.NicknameExists) {
-            nicknameError.textContent = 'このニックネームは既に使われています';
-            isValid = false;
-          }
-          if (checkResponse.data.IDExists) {
-            idError.textContent = 'このIDは既に使われています';
-            isValid = false;
-          }
-  
-          // どちらも問題がない場合に登録処理を続行
-          if (isValid) {
-            const formData = {
-              Nickname: nickname.value,
-              ID: id.value,
-              Password: password.value
-            };
-  
-            const response = await axios.post('https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/INSERT', formData);
-  
-            formMessage.textContent = response.data.Message;
-            formMessage.style.color = response.status === 200 ? 'green' : 'red';
-  
-            // 成功時
-            if (response.status === 200) {
-              // 2秒後にリダイレクト
-              setTimeout(() => {
-                window.location.href = 'index_SignUpResult.html';
-              }, 2000);
-            }
+            ID: id.value,
+            Password: password.value
+          };
+
+          const response = await axios.post('https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/INSERT', formData);
+
+          formMessage.textContent = response.data.Message;
+          formMessage.style.color = response.status === 200 ? 'green' : 'red';
+
+          // 成功時
+          if (response.status === 200) {
+            // 2秒後にリダイレクト
+            setTimeout(() => {
+              window.location.href = 'index_SignUpResult.html';
+            }, 2000);
           }
         } catch (error) {
           formMessage.textContent = '送信中にエラーが発生しました: ' + error.message;
@@ -198,4 +180,5 @@
       }
     });
   </script>
-  
+</body>
+</html>
