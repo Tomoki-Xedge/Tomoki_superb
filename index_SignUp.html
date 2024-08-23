@@ -120,7 +120,7 @@
 
       let isValid = true;
 
-      // ニックネームのバリデーション
+      // ニックネーム制御
       if (nickname.value.length === 0) {
         nicknameError.textContent = 'ニックネームは必須です';
         isValid = false;
@@ -129,7 +129,7 @@
         isValid = false;
       }
 
-      // IDのバリデーション
+      // ID制御
       if (!/^[a-zA-Z0-9]*$/.test(id.value)) {
         idError.textContent = 'IDは英数字で入力してください';
         isValid = false;
@@ -141,7 +141,7 @@
         isValid = false;
       }
 
-      // パスワードのバリデーション
+      // パスワード制御
       if (!/^[a-zA-Z0-9]*$/.test(password.value)) {
         passwordError.textContent = 'パスワードは英数字で入力してください';
         isValid = false;

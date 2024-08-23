@@ -123,7 +123,7 @@
             }
           } catch (error) {
             if (error.response) {
-              // エラーレスポンスがある場合の処理
+              // エラーレスポンス時の処理
               if (error.response.status === 401) {
                 alert('ID または パスワード が一致しません。');
               } else {
