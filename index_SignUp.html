@@ -1,121 +1,184 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Interaction</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .form-container { margin-bottom: 20px; }
-        .form-container input { margin-bottom: 10px; }
-        .result { margin-top: 20px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>会員登録</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #333;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .error {
+      color: red;
+      font-size: 0.875em;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      background-color: #007bff;
+      color: #fff;
+      font-size: 1em;
+      cursor: pointer;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .btn:hover {
+      background-color: #0056b3;
+    }
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: #007bff;
+      text-decoration: none;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
-    <h1>API Interaction</h1>
-    
-    <!-- Select Form -->
-    <div class="form-container">
-        <h2>IDとパスワードの確認</h2>
-        <input type="text" id="selectId" placeholder="ID" />
-        <input type="password" id="selectPassword" placeholder="Password" />
-        <button onclick="selectUser()">確認</button>
-        <div id="selectResult" class="result"></div>
-    </div>
-    
-    <!-- Insert Form -->
-    <div class="form-container">
-        <h2>会員登録</h2>
-        <input type="text" id="insertNickname" placeholder="Nickname" />
-        <input type="text" id="insertId" placeholder="ID" />
-        <input type="password" id="insertPassword" placeholder="Password" />
-        <button onclick="insertUser()">登録</button>
-        <div id="insertResult" class="result"></div>
-    </div>
-    
-    <!-- Fortune Result Form -->
-    <div class="form-container">
-        <h2>おみくじ結果</h2>
-        <button onclick="getFortuneResult()">結果を取得</button>
-        <div id="fortuneResult" class="result"></div>
-    </div>
+  <div class="container">
+    <h1>会員登録</h1>
+    <form id="userForm">
+      <div class="form-group">
+        <label for="nickname">ニックネーム:</label>
+        <input type="text" id="nickname" name="nickname" maxlength="20" required>
+        <div id="nicknameError" class="error"></div>
+      </div>
+      <div class="form-group">
+        <label for="id">ID:</label>
+        <input type="text" id="id" name="id" maxlength="12" required pattern="[a-zA-Z0-9]*">
+        <div id="idError" class="error"></div>
+      </div>
+      <div class="form-group">
+        <label for="password">パスワード:</label>
+        <input type="password" id="password" name="password" maxlength="12" required pattern="[a-zA-Z0-9]*">
+        <div id="passwordError" class="error"></div>
+      </div>
+      <button type="submit" class="btn">登録</button>
+      <div id="formMessage" class="error"></div>
+    </form>
 
-    <script>
-        const apiBaseUrl = 'https://your-function-app-url.azurewebsites.net/api/';
+    <a href="index.html" class="back-link">戻る</a>
+  </div>
 
-        async function selectUser() {
-            const id = document.getElementById('selectId').value;
-            const password = document.getElementById('selectPassword').value;
-            const resultDiv = document.getElementById('selectResult');
+  <script>
+    document.getElementById('userForm').addEventListener('submit', async function(event) {
+      event.preventDefault(); 
 
-            if (!id || !password) {
-                resultDiv.textContent = 'ID と Password を入力してください。';
-                return;
-            }
+      // 入力フィールドの取得
+      const nickname = document.getElementById('nickname');
+      const id = document.getElementById('id');
+      const password = document.getElementById('password');
 
-            try {
-                const response = await fetch(`${apiBaseUrl}SELECT?ID=${encodeURIComponent(id)}&Password=${encodeURIComponent(password)}`, {
-                    method: 'GET',
-                });
+      // エラーメッセージ要素の取得
+      const nicknameError = document.getElementById('nicknameError');
+      const idError = document.getElementById('idError');
+      const passwordError = document.getElementById('passwordError');
+      const formMessage = document.getElementById('formMessage');
 
-                const result = await response.json();
-                if (response.ok) {
-                    resultDiv.textContent = 'ログイン成功！';
-                } else {
-                    resultDiv.textContent = result.Message || 'ログイン失敗';
-                }
-            } catch (error) {
-                resultDiv.textContent = 'エラーが発生しました。';
-            }
+      nicknameError.textContent = '';
+      idError.textContent = '';
+      passwordError.textContent = '';
+      formMessage.textContent = '';
+
+      let isValid = true;
+
+      // ニックネーム制御
+      if (nickname.value.length === 0) {
+        nicknameError.textContent = 'ニックネームは必須です';
+        isValid = false;
+      } else if (nickname.value.length > 20) {
+        nicknameError.textContent = 'ニックネームは20文字以内で入力してください';
+        isValid = false;
+      }
+
+      // ID制御
+      if (!/^[a-zA-Z0-9]*$/.test(id.value)) {
+        idError.textContent = 'IDは英数字で入力してください';
+        isValid = false;
+      } else if (id.value.length === 0) {
+        idError.textContent = 'IDは必須です';
+        isValid = false;
+      } else if (id.value.length > 12) {
+        idError.textContent = 'IDは12文字以内で入力してください';
+        isValid = false;
+      }
+
+      // パスワード制御
+      if (!/^[a-zA-Z0-9]*$/.test(password.value)) {
+        passwordError.textContent = 'パスワードは英数字で入力してください';
+        isValid = false;
+      } else if (password.value.length === 0) {
+        passwordError.textContent = 'パスワードは必須です';
+        isValid = false;
+      } else if (password.value.length > 12) {
+        passwordError.textContent = 'パスワードは12文字以内で入力してください';
+        isValid = false;
+      }
+
+      if (isValid) {
+        try {
+          const formData = {
+            Nickname: nickname.value,
+            ID: id.value,
+            Password: password.value
+          };
+
+          const response = await axios.post('https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/INSERT', formData);
+
+          formMessage.textContent = response.data.Message;
+          formMessage.style.color = response.status === 200 ? 'green' : 'red';
+
+          // 成功時
+          if (response.status === 200) {
+            // 2秒後にリダイレクト
+            setTimeout(() => {
+              window.location.href = 'index_SignUpResult.html';
+            }, 2000);
+          }
+        } catch (error) {
+          formMessage.textContent = '送信中にエラーが発生しました: ' + error.message;
+          formMessage.style.color = 'red';
         }
-
-        async function insertUser() {
-            const nickname = document.getElementById('insertNickname').value;
-            const id = document.getElementById('insertId').value;
-            const password = document.getElementById('insertPassword').value;
-            const resultDiv = document.getElementById('insertResult');
-
-            if (!nickname || !id || !password) {
-                resultDiv.textContent = '全てのフィールドを入力してください。';
-                return;
-            }
-
-            try {
-                const response = await fetch(`${apiBaseUrl}INSERT`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ Nickname: nickname, ID: id, Password: password }),
-                });
-
-                const result = await response.json();
-                if (response.ok) {
-                    resultDiv.textContent = '登録成功！';
-                } else {
-                    resultDiv.textContent = result.Message || '登録失敗';
-                }
-            } catch (error) {
-                resultDiv.textContent = 'エラーが発生しました。';
-            }
-        }
-
-        async function getFortuneResult() {
-            const resultDiv = document.getElementById('fortuneResult');
-
-            try {
-                const response = await fetch(`${apiBaseUrl}GET_FORTUNE_RESULT`, {
-                    method: 'GET',
-                });
-
-                const result = await response.json();
-                if (response.ok) {
-                    resultDiv.textContent = `おみくじ結果: ${result.Result}`;
-                } else {
-                    resultDiv.textContent = '結果取得に失敗しました';
-                }
-            } catch (error) {
-                resultDiv.textContent = 'エラーが発生しました。';
-            }
-        }
-    </script>
+      }
+    });
+  </script>
 </body>
 </html>
