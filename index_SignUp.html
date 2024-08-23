@@ -70,7 +70,6 @@
       text-decoration: underline;
     }
   </style>
-  <!-- Axios CDN -->
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
@@ -96,13 +95,12 @@
       <div id="formMessage" class="error"></div>
     </form>
 
-    <!-- 戻るリンク -->
     <a href="index.html" class="back-link">戻る</a>
   </div>
 
   <script>
     document.getElementById('userForm').addEventListener('submit', async function(event) {
-      event.preventDefault(); // フォームのデフォルトの送信を防ぐ
+      event.preventDefault(); 
 
       // 入力フィールドの取得
       const nickname = document.getElementById('nickname');
@@ -115,16 +113,14 @@
       const passwordError = document.getElementById('passwordError');
       const formMessage = document.getElementById('formMessage');
 
-      // エラーメッセージの初期化
       nicknameError.textContent = '';
       idError.textContent = '';
       passwordError.textContent = '';
       formMessage.textContent = '';
 
-      // バリデーションフラグ
       let isValid = true;
 
-      // ニックネームのバリデーション
+      // ニックネーム制御
       if (nickname.value.length === 0) {
         nicknameError.textContent = 'ニックネームは必須です';
         isValid = false;
@@ -133,7 +129,7 @@
         isValid = false;
       }
 
-      // IDのバリデーション
+      // ID制御
       if (!/^[a-zA-Z0-9]*$/.test(id.value)) {
         idError.textContent = 'IDは英数字で入力してください';
         isValid = false;
@@ -145,7 +141,7 @@
         isValid = false;
       }
 
-      // パスワードのバリデーション
+      // パスワード制御
       if (!/^[a-zA-Z0-9]*$/.test(password.value)) {
         passwordError.textContent = 'パスワードは英数字で入力してください';
         isValid = false;
@@ -157,29 +153,41 @@
         isValid = false;
       }
 
-      // バリデーション成功時の処理
       if (isValid) {
         try {
-          // フォームデータの収集
-          const formData = {
-            Nickname: nickname.value,
-            ID: id.value,
-            Password: password.value
-          };
+          // ニックネームとIDの重複チェック
+          const nicknameResponse = await axios.post('https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/SELECT', { Nickname: nickname.value });
+          const idResponse = await axios.post('https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/SELECT', { ID: id.value });
 
-          // サーバーにデータを送信
-          const response = await axios.post('https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/INSERT', formData);
+          if (nicknameResponse.data.Message === 'Nickname already exists') {
+            nicknameError.textContent = 'ニックネームは既に使用されています';
+            isValid = false;
+          }
 
-          // レスポンスの処理
-          formMessage.textContent = response.data.Message;
-          formMessage.style.color = response.status === 200 ? 'green' : 'red';
+          if (idResponse.data.Message === 'ID already exists') {
+            idError.textContent = 'IDは既に使用されています';
+            isValid = false;
+          }
 
-          // 成功時の処理
-          if (response.status === 200) {
-            // 2秒後にリダイレクトする
-            setTimeout(() => {
-              window.location.href = 'index_SignUpResult.html';
-            }, 2000);
+          if (isValid) {
+            const formData = {
+              Nickname: nickname.value,
+              ID: id.value,
+              Password: password.value
+            };
+
+            const response = await axios.post('https://m3h-tomoki-3appfunctionapiapp.azurewebsites.net/api/INSERT', formData);
+
+            formMessage.textContent = response.data.Message;
+            formMessage.style.color = response.status === 200 ? 'green' : 'red';
+
+            // 成功時
+            if (response.status === 200) {
+              // 2秒後にリダイレクト
+              setTimeout(() => {
+                window.location.href = 'index_SignUpResult.html';
+              }, 2000);
+            }
           }
         } catch (error) {
           formMessage.textContent = '送信中にエラーが発生しました: ' + error.message;
@@ -190,4 +198,3 @@
   </script>
 </body>
 </html>
-
