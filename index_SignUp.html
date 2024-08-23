@@ -166,13 +166,12 @@
           if (response.status === 200) {
             formMessage.textContent = response.data.Message;
             formMessage.style.color = 'green';
-
-            // 成功時
+            
+            // 2秒後にリダイレクト
             setTimeout(() => {
               window.location.href = 'index_SignUpResult.html';
             }, 2000);
           } else if (response.status === 409) {
-            // 既存のIDまたはニックネームがある場合
             formMessage.textContent = response.data.Message;
             formMessage.style.color = 'red';
           }
